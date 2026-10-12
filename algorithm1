@@ -1,0 +1,38 @@
+JŚCIE:
+ ID_Obiektu : Unikalny identyfikator przestrzeni zabezpieczonej (np. numer seryjny
+pojemnika/kontenera)
+ ID_Oper : Identyfikator operatora / dokumentu autoryzującego
+ H_Prev : Skrót kryptograficzny (hash) ostatniej transakcji w lokalnym rejestrze terminala
+WYJŚCIE:
+ Blob_TX : Kryptograficzny pakiet transakcyjny terminala (do późniejszej wysyłki)
+ Init_Frame : Kotwica kryptograficzna przesłana do pamięci węzła brzegowego
+KROK 1: [Detekcja i zmiana trybu]
+ Status_NET = Ping(System_Centralny, Timeout = 3000ms)
+ JEŻELI Status_NET != ONLINE WTEDY:
+ Zainicjuj Tryb Awaryjny (OFFLINE_MODE).
+KROK 2: [Pobranie czasu ze sprzętowej wyroczni]
+ Wyślij żądanie do zaplombowanego urządzenia rejestrującego (np. drukarki fiskalnej):
+ T_Fiscal = Urzadzenie_Fiskalne.Odczytaj_RTC()
+Zwróć wynik: {Data, Czas, Certyfikat_Urzadzenia}
+KROK 3: [Generowanie ogniwa lokalnego łańcucha - Localchain]
+ Payload_POS = Konkatenacja(ID_Obiektu, ID_Oper, T_Fiscal, H_Prev)
+ H_Curr = SHA256(Payload_POS)
+KROK 4: [Zabezpieczenie kryptograficzne dowodu offline]
+ Sig_POS = Podpis_Asymetryczny(H_Curr, Klucz_Prywatny_Terminala)
+ Blob_TX = {Payload_POS, H_Curr, Sig_POS}
+ Zapisz Blob_TX w pamięci nieulotnej terminala.
+KROK 5: [Bezprzewodowy transfer zaufania do węzła brzegowego]
+ Init_Frame = {
+ ID_Obiektu,
+ T_Zero : T_Fiscal,
+ Anchor_Hash : H_Curr,
+ Klucz_Publiczny_Terminala
+ }
+ Zapisz_NFC(Init_Frame -> Pamięć_EEPROM_Węzła_Brzegowego)
+ Czekaj na potwierdzenie zapisu (ACK) od węzła brzegowego.
+KROK 6: [Zwolnienie blokady sprzętowej terminala]
+ JEŻELI (Otrzymano_ACK == PRAWDA) WTEDY:
+ Zwolnij Hard_Lock głowicy drukującej.
+ Wydrukuj sprzętowe poświadczenie operacji ze skrótem H_Curr.
+ W PRZECIWNYM RAZIE:
+ Przerwij procedurę i zablokuj wydanie.
