@@ -28,3 +28,6 @@ WTEDY:
  "Integralność przestrzeni naruszona w sposób poświadczony w czasie T_Tamper".
  W PRZECIWNYM RAZIE:
  ZGŁOŚ ALARM (Uszkodzony lub sfałszowany blok lokalny węzła brzegowego).
+KROK 4: [Aktualizacja struktury globalnej]
+ Zaktualizuj Stan_Rejestru.H_Last_Known = H_Curr.
+ Zamknij cykl życia identyfikatora ID_Obiektu w systemie.
