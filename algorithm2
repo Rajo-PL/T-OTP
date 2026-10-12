@@ -1,0 +1,27 @@
+RUNEK POCZĄTKOWY:
+ Węzeł brzegowy w stanie uśpienia (Ultra-Low Power Standby).
+ Niszczalny obwód mostkujący (np. etykieta z kodem przewodzącym) zwarty galwanicznie.
+ZDARZENIE WYZWALAJĄCE (TAMPER EVENT):
+ Mechaniczne otwarcie elementu dostępowego trwale rozwiera obwód mostkujący.
+ Generowane jest przerwanie sprzętowe NMI (Non-Maskable Interrupt).
+PROCEDURA WYKONAWCZA (ISR - Interrupt Service Routine):
+KROK 1: [Inicjalizacja zasilania awaryjnego]
+ Odłącz magistralę peryferiów zewnętrznych (NFC/RF).
+ Zasilaj rdzeń koprocesora i moduł RTC wyłącznie z wewnętrznego nanokondensatora (C_nano).
+KROK 2: [Pobranie brzegowego znacznika czasu i telemetrii]
+ T_Tamper = Wewnętrzny_RTC.Pobierz_Czas()
+ JEŻELI Sensory_Aktywne == PRAWDA WTEDY:
+ Dane_Telemetrii = Odczytaj(Czujnik_Temperatury, Czujnik_Wilgotności)
+ W PRZECIWNYM RAZIE:
+ Dane_Telemetrii = NULL
+KROK 3: [Kalkulacja sprzętowego bloku uwiarygadniającego]
+ Odczytaj z EEPROM: Anchor_Hash (zapisany w Algorytmie 1).
+ Payload_Edge = Konkatenacja(Anchor_Hash, T_Tamper, Dane_Telemetrii, Kod_Zdarzenia)
+ H_Tamper = SHA256(Payload_Edge)
+KROK 4: [Cyfrowe zapieczętowanie w pamięci trwałej]
+ Sig_Edge = Podpis_ECDSA(H_Tamper, Klucz_Prywatny_Węzła)
+ Zapisz_Do_Flash({Payload_Edge, H_Tamper, Sig_Edge})
+KROK 5: [Zeroizacja i dezaktywacja układu]
+ Zapisz flagę naruszenia w rejestrze jednokrotnego zapisu (OTP_FLAG = 1).
+ Aktywuj procedurę eFuse_Burn (trwałe zniszczenie pierwotnego klucza symetrycznego).
+ Zatrzymaj zegar systemowy przed całkowitym spadkiem napięcia (Halt).
