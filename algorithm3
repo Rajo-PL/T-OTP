@@ -1,0 +1,30 @@
+WEJŚCIE:
+ Paczka_Terminala : {Payload_POS, H_Curr, Sig_POS} (od terminala dystrybucyjnego)
+ Paczka_Brzegowa : {Payload_Edge, H_Tamper, Sig_Edge} (wyekstrahowana z
+pojemnika/naczepy u odbiorcy)
+ Stan_Rejestru : Zapisany na serwerze ostatni prawidłowy hash (H_Last_Known)
+KROK 1: [Weryfikacja kryptograficzna terminala]
+ Weryfikuj Sig_POS za pomocą Klucza_Publicznego_Terminala.
+ JEŻELI (Błąd_Podpisu) WTEDY: ZGŁOŚ ALARM (Fałszerstwo pochodzenia); ZAKOŃCZ.
+KROK 2: [Weryfikacja ciągłości i legalności czasu operacji]
+ JEŻELI (Payload_POS.H_Prev != Stan_Rejestru.H_Last_Known) WTEDY:
+ ZGŁOŚ ALARM (Przerwanie łańcucha - podejrzenie manipulacji wstecznej).
+
+ T_Operacji = Payload_POS.T_Fiscal
+ JEŻELI (T_Operacji > Wymagany_Termin_Prawny) WTEDY:
+ ZGŁOŚ BŁĄD (Transakcja przeterminowana przed zatwierdzeniem offline).
+ W PRZECIWNYM RAZIE:
+ Zatwierdź T_Operacji jako legalny czas zdarzenia.
+KROK 3: [Weryfikacja integralności fizycznej u odbiorcy]
+ JEŻELI (Paczka_Brzegowa NIE JEST PUSTA) WTEDY:
+ Weryfikuj Sig_Edge za pomocą Klucza_Publicznego_Węzła.
+
+ JEŻELI (Payload_Edge.Anchor_Hash == Payload_POS.H_Curr) ORAZ (OTP_FLAG == 1)
+WTEDY:
+ Oblicz Check_Hash = SHA256(Payload_Edge)
+ JEŻELI (Check_Hash == H_Tamper) WTEDY:
+ Odczytaj T_Tamper oraz Dane_Telemetrii z Payload_Edge.
+ Zapisz w niezmiennym dzienniku audytowym:
+ "Integralność przestrzeni naruszona w sposób poświadczony w czasie T_Tamper".
+ W PRZECIWNYM RAZIE:
+ ZGŁOŚ ALARM (Uszkodzony lub sfałszowany blok lokalny węzła brzegowego).
