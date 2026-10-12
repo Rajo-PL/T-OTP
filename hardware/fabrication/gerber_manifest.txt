@@ -1,0 +1,8 @@
+Manufacturing Data (Gerber RS-274X & Excellon Drill Files)
+Project: T-OTP Edge Node (FPC Smart Label)
+Patent Pending: P.457301
+
+Note: The full set of production Gerber files is currently withheld pending the final physical prototyping and validation phase for NIS2/DORA compliance testing. 
+The complete ZIP archive containing F.Cu, B.Cu, Solder Masks, Silkscreen, and Edge Cuts will be published under the CERN-OHL-S license in the upcoming release [v1.0-RC].
+
+For inquiries regarding early access to fabrication data for Data Center integration testing, please contact the repository owner.
