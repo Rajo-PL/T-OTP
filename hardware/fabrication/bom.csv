@@ -1,0 +1,8 @@
+Designator,Value,Footprint,Quantity,LCSC Part,Description
+U1,Secure_MCU,Package_DFN_8x8mm,1,C327891,Secure Cryptographic Coprocessor (NXP / STM32)
+U2,DS3231M,SOIC-8_3.9x4.9mm,1,C82343,Extremely Accurate I2C RTC with TCXO
+C_NANO,1mF_LowESR,Capacitor_SMD:C_1210_3225Metric,1,C138356,Hold-up Tantalum/Polymer Nanocapacitor
+D1,BAT54C,SOT-23,1,C12212,Dual Schottky Barrier Diode (Power Isolation)
+U3,ST25DV,SOIC-8_3.9x4.9mm,1,C112349,Dynamic NFC RFID Tag for Zero-T Anchor
+R1,10k,Resistor_SMD:R_0402_1005Metric,1,C25744,Pull-up resistor for NMI Tamper Loop
+J1,FPC_2PIN_0.5mm,Connector_FFC-FPC:0.5mm_2pin,1,C29384,Złącze obwodu niszczącego (Plomba)
