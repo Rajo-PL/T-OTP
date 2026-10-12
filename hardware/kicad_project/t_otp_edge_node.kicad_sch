@@ -1,0 +1,58 @@
+(kicad_sch (version 20230121) (generator eeschema)
+  (uuid "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+  (paper "A4")
+  (title_block
+    (title "T-OTP Edge Node - Hardware Tamper Loop")
+    (company "Rajmund Olszewski")
+    (rev "1.0")
+    (date "2026-10-12")
+    (comment 1 "PATENT PENDING: P.457301, P.454742")
+    (comment 2 "LICENSE: CERN-OHL-S v2")
+  )
+  
+  ;; DEKLARACJA KOMPONENTÓW (BOM CORE)
+  (lib_symbols
+    (symbol "Device:C_Small" (pin_numbers hide) (pin_names (offset 0.254) hide)
+      (property "Reference" "C_NANO" (at 0.635 2.54 0))
+      (property "Value" "1mF_LowESR" (at 0.635 -2.54 0)))
+    (symbol "Device:D_Schottky" (pin_numbers hide)
+      (property "Reference" "D1" (at 0 2.54 0))
+      (property "Value" "BAT54C" (at 0 -2.54 0)))
+    (symbol "MCU_Secure:Edge_Crypto_MCU"
+      (property "Reference" "U1" (at -5.08 7.62 0))
+      (property "Value" "Secure_Koprocesor" (at 5.08 7.62 0)))
+    (symbol "Connector:Conn_Tamper_Loop"
+      (property "Reference" "J1" (at 0 2.54 0))
+      (property "Value" "Niszczalny_Obwod_Mostkujacy" (at 0 -2.54 0)))
+  )
+
+  ;; LOGIKA POŁĄCZEŃ (NETLIST) - REALIZACJA ZGŁOSZENIA P.457301
+  (wire (pts (xy 50.8 50.8) (xy 63.5 50.8))
+    (stroke (width 0.1524) (type default)) (uuid "net-vcc-in"))
+  
+  (wire (pts (xy 76.2 50.8) (xy 88.9 50.8))
+    (stroke (width 0.3) (type default)) (uuid "net-vcc-safe"))
+
+  ;; SIECI (NETS)
+  (net (code 1) (name "VCC_MAIN")
+    (node (ref "J_PWR1") (pin "1"))
+    (node (ref "D1") (pin "1") (pintype "passive"))) ; Wejście na diodę blokującą
+
+  (net (code 2) (name "VCC_SAFE")
+    ;; Izolowana domena zasilania - ładunek z C_NANO nie cofa się do systemu
+    (node (ref "D1") (pin "2") (pintype "passive"))
+    (node (ref "C_NANO") (pin "1") (pintype "passive"))
+    (node (ref "U1") (pin "8") (pinfunction "VDD") (pintype "power_in"))
+    (node (ref "U2") (pin "2") (pinfunction "VCC") (pintype "power_in"))) ; RTC VCC
+
+  (net (code 3) (name "GND")
+    (node (ref "C_NANO") (pin "2") (pintype "passive"))
+    (node (ref "U1") (pin "4") (pinfunction "VSS") (pintype "power_in"))
+    (node (ref "J1") (pin "2") (pintype "passive"))) ; Uziemienie pętli plomby
+
+  (net (code 4) (name "NMI_TAMPER_TRIGGER")
+    ;; Sprzętowe przerwanie - zerwanie obwodu (J1) wyciąga pin NMI do stanu HIGH
+    (node (ref "U1") (pin "2") (pinfunction "NMI") (pintype "input"))
+    (node (ref "R_PULLUP") (pin "2") (pintype "passive"))
+    (node (ref "J1") (pin "1") (pintype "passive"))) 
+)
